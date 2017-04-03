@@ -15,11 +15,11 @@
 all: plan apply
 
 plan:
-	terraform plan -var-file terraform.tfvars -out terraform.tfplan
+	terraform plan -var-file terraform.tfvars -out terraform.tfplan | tee -a logs/plan.log
 
 apply:
-	terraform apply -var-file terraform.tfvars
+	terraform apply -var-file terraform.tfvars -backup terraform.backup | tee -a logs/apply.log
 
 destroy:
-	terraform plan -destroy -var-file terraform.tfvars -out terraform.tfplan
-	terraform apply terraform.tfplan
+	terraform plan -destroy -var-file terraform.tfvars -out terraform.tfplan | tee -a logs/destroy.log
+	terraform apply terraform.tfplan | tee -a logs/destroy.log
