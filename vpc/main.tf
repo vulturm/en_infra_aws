@@ -1,3 +1,13 @@
+#
+# Project Name:: en_aws_infra
+# File:: vpc/main.tf
+#
+# Copyright (C) 2017 - Present
+# Author: 'Mihai Vultur <mihai.vultur@endava.com>'
+#
+# All rights reserved
+#
+
 variable "name" { default = "vpc" }
 variable "cidr" {}
 

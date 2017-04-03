@@ -1,3 +1,17 @@
+#
+# Project Name:: en_aws_infra
+# File:: variables.tf
+#
+# Copyright (C) 2017 - Present
+# Author: 'Mihai Vultur <mihai.vultur@endava.com>'
+#
+# All rights reserved
+#
+# Description:
+#   Variables we're using.
+#   If a default value is set, the variable is optional.
+#   Otherwise, the variable is required.
+
 variable "name" {}
 variable "vpc_cidr" {}
 
