@@ -12,13 +12,13 @@
 
 
 provider "aws" {
-    region  = "${var.region}"
-    shared_credentials_file="~/.aws/credentials"
+  region  = "${var.region}"
+  shared_credentials_file="~/.aws/credentials"
 }
 
 module "vpc" {
   source = "./vpc"
 
   name = "${var.name}-vpc"
-  cidr = "${var.vpc_cidr}"
+  cidr = "10.10.0.0/16"
 }
