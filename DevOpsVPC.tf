@@ -10,6 +10,12 @@
 # Description:
 #   Holds our module import definitions.
 
+
+provider "aws" {
+    region  = "${var.region}"
+    shared_credentials_file="~/.aws/credentials"
+}
+
 module "vpc" {
   source = "./vpc"
 
