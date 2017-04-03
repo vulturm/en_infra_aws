@@ -36,8 +36,11 @@ variable "enable_dns_hostnames" {
   default = false
 }
 
-variable "tags" {
+variable "default_tags" {
   description = "A map of tags to add to all resources"
-  default     = {}
-  Name        = "mike-${var.name}"
+  type        = "map"
+  default = {
+    "creation-author" = "mike"
+    "provisioner" = "terraform"
+  }
 }
