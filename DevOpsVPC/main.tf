@@ -22,12 +22,20 @@ resource "aws_key_pair" "xanto" {
   public_key = "${var.ssh_public_key}"
 }
 
+resource "aws_vpc" "vpc" {
+  cidr_block           = "${var.vpc_cidr}"
+  enable_dns_support   = "${var.enable_dns_support}"
+  enable_dns_hostnames = "${var.enable_dns_hostnames}"
+  lifecycle { 
+    create_before_destroy = true
+  }
+  tags      {
+    Name = "${var.vpc_name}"
+  }
+}
 
-module "vpc"  {
-  source = "github.com/hashicorp/best-practices//terraform/modules/aws/network/vpc"
 
-  name = "${var.vpc_name}"
-  cidr = "${var.vpc_cidr}"
+
 }
 
 # Security Group #
