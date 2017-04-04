@@ -13,6 +13,10 @@
 .PHONY: all plan apply destroy
 
 all: plan apply
+test: plan
+
+get:
+	terraform get
 
 plan:
 	terraform plan -var-file infrastructure.conf -out terraform.tfplan | tee -a logs/plan.log
