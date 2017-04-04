@@ -76,11 +76,11 @@ variable "ec2_ami" {
 #}
 #
 ##-- Tags for accounting
-#variable "default_tags" {
-#  description = "A map of tags to add to all resources"
-#  type        = "map"
-#  default = {
-#    "creation-author" = "mike"
-#    "provisioner" = "terraform"
-#  }
-#}
+variable "default_tags" {
+  description = "A map of tags to add to all resources"
+  type        = "map"
+  default = {
+    "Author" = "mike"
+    "Provisioner" = "terraform"
+  }
+}
