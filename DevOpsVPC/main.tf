@@ -30,4 +30,40 @@ module "vpc"  {
   cidr = "${var.vpc_cidr}"
 }
 
+# Security Group #
+resource "aws_security_group" "Allow_ICMP" {
+  name        = "Allow_ICMP"
+  description = "Allow all ICMP traffic"
+
+  ingress {
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags {
+    Name = "${var.vpc_name}-Allow_ICMP"
+  }
+}
+
+resource "aws_security_group" "sg_test" {
+  name = "sg_test"
+  description = "default VPC security group"
+
+  # TCP access
+  ingress {
+    from_port = 0
+    to_port = 65535
+    protocol = "tcp"
+    cidr_blocks = ["194.126.146.0/24"]
+  }
+
+  # HTTP access from anywhere
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
