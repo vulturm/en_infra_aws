@@ -41,11 +41,23 @@ variable "vpc_public_subnets"  {
   type = "list"
 }
 
+#-- Security
+variable "ssh_key_name" {
+  description = "Name of the SSH Key"
+  type = "string"
+}
+variable "ssh_public_key" {
+  description = "The public key material"
+  type = "string"
+}
+
 #-- EC2
 variable "ec2_ami" {
   description = "Name of the AMI image used for EC2 creation"
   type = "string"
 }
+
+
 
 # TODO for future
 #variable "enable_dns_support" {

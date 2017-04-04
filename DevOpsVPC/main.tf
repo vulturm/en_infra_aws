@@ -17,18 +17,17 @@ provider "aws" {
   shared_credentials_file   = "/home/vagrant/.aws/credentials"
 }
 
-# Network
-module "vpc" {
-  source                = "github.com/terraform-community-modules/tf_aws_vpc"
+resource "aws_key_pair" "xanto" {
+  key_name = "${var.ssh_key_name}"
+  public_key = "${var.ssh_public_key}"
+}
 
-  azs                   = "${var.aws_azs}"
-  name                  = "${var.vpc_name}"
-  #-- networking
-  cidr                  = "${var.vpc_cidr}"
-  public_subnets        = "${var.vpc_public_subnets}"
-  private_subnets       = "${var.vpc_private_subnets}"
-  enable_dns_support    = "${var.enable_dns_support}"
-  enable_dns_hostnames  = "${var.enable_dns_hostnames}"
-  enable_nat_gateway    = "${var.enable_nat_gateway}"
-  tags                  = "${merge(var.default_tags, map("VPC", "${var.vpc_name}"))}"
+
+module "vpc"  {
+  source = "github.com/hashicorp/best-practices//terraform/modules/aws/network/vpc"
+
+  name = "${var.vpc_name}"
+  cidr = "${var.vpc_cidr}"
+}
+
 }
