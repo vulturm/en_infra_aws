@@ -28,7 +28,7 @@ variable "vpc_name" {
 }
 
 #-- Networking
-variable "vpc_cidr"        {
+variable "vpc_cidr" {
   description = "The CIDR block for our VPC"
   type = "string"
 }
@@ -39,6 +39,12 @@ variable "vpc_private_subnets" {
 variable "vpc_public_subnets"  {
   description = "The CIDR blocks for our public subnets"
   type = "list"
+}
+
+#-- EC2
+variable "ec2_ami" {
+  description = "Name of the AMI image used for EC2 creation"
+  type = "string"
 }
 
 # TODO for future
