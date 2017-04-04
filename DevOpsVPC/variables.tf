@@ -40,6 +40,14 @@ variable "vpc_public_subnets"  {
   description = "The CIDR blocks for our public subnets"
   type = "list"
 }
+variable "enable_dns_support" {
+  description = "Should be true if you want to use private DNS within the VPC"
+  default = false
+}
+variable "enable_dns_hostnames" {
+  description = "Should be true if you want to use private DNS within the VPC"
+  default = false
+}
 
 #-- Security
 variable "ssh_key_name" {
@@ -57,24 +65,6 @@ variable "ec2_ami" {
   type = "string"
 }
 
-
-
-# TODO for future
-#variable "enable_dns_support" {
-#  description = "Should be true if you want to use private DNS within the VPC"
-#  default = false
-#}
-#
-#variable "enable_dns_hostnames" {
-#  description = "Should be true if you want to use private DNS within the VPC"
-#  default = false
-#}
-#
-#variable "enable_nat_gateway" {
-#  description = "Should be true if you want to provision NAT Gateways for each of your private networks"
-#  default = false
-#}
-#
 ##-- Tags for accounting
 variable "default_tags" {
   description = "A map of tags to add to all resources"
@@ -84,3 +74,7 @@ variable "default_tags" {
     "Provisioner" = "terraform"
   }
 }
+
+# TODO for future
+#...
+
