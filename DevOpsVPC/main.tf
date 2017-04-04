@@ -34,6 +34,15 @@ resource "aws_vpc" "vpc" {
   }
 }
 
+#--
+module "public_subnet" {
+  source = "github.com/hashicorp/best-practices//terraform/modules/aws/network/public_subnet"
+  vpc_id = "${aws_vpc.vpc.id}"
+  azs    = "${join(",",var.aws_azs)}"
+  #--
+  name   = "${var.vpc_name}_Public_Subnet"
+  cidrs  = "${join(",", var.vpc_public_subnets)}"
+}
 
 resource "aws_instance" "NatInstance" {
   ami                         = "${var.ec2_ami}"
@@ -48,11 +57,22 @@ resource "aws_instance" "NatInstance" {
 }
 
 
+module "private_subnet" {
+  source = "github.com/hashicorp/best-practices//terraform/modules/aws/network/private_subnet"
+  vpc_id = "${aws_vpc.vpc.id}"
+  azs    = "${join(",",var.aws_azs)}"
 
+  name   = "${var.vpc_name}_Private_Subnet"
+  cidrs  = "${join(",", var.vpc_private_subnets)}"
+#  nat_gateway_ids = "${module.NatInstance.id}"
+  nat_gateway_ids = "${aws_instance.NatInstance.id}"
 }
+
+
 
 # Security Group #
 resource "aws_security_group" "Allow_ICMP" {
+  vpc_id      = "${aws_vpc.vpc.id}"
   name        = "Allow_ICMP"
   description = "Allow all ICMP traffic"
 
@@ -69,6 +89,7 @@ resource "aws_security_group" "Allow_ICMP" {
 }
 
 resource "aws_security_group" "sg_test" {
+  vpc_id      = "${aws_vpc.vpc.id}"
   name = "sg_test"
   description = "default VPC security group"
 
@@ -86,5 +107,8 @@ resource "aws_security_group" "sg_test" {
     to_port = 80
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags {
+    Name = "${var.vpc_name}-SG_Test"
   }
 }
