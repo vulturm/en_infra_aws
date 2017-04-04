@@ -41,29 +41,28 @@ variable "vpc_public_subnets"  {
   type = "list"
 }
 
-variable "enable_dns_support" {
-  description = "Should be true if you want to use private DNS within the VPC"
-  default = false
-}
-
-variable "enable_dns_hostnames" {
-  description = "Should be true if you want to use private DNS within the VPC"
-  default = false
-}
-
-variable "enable_nat_gateway" {
-  description = "Should be true if you want to provision NAT Gateways for each of your private networks"
-  default = false
-}
-
-
-
-#-- Tags for accounting
-variable "default_tags" {
-  description = "A map of tags to add to all resources"
-  type        = "map"
-  default = {
-    "creation-author" = "mike"
-    "provisioner" = "terraform"
-  }
-}
+# TODO for future
+#variable "enable_dns_support" {
+#  description = "Should be true if you want to use private DNS within the VPC"
+#  default = false
+#}
+#
+#variable "enable_dns_hostnames" {
+#  description = "Should be true if you want to use private DNS within the VPC"
+#  default = false
+#}
+#
+#variable "enable_nat_gateway" {
+#  description = "Should be true if you want to provision NAT Gateways for each of your private networks"
+#  default = false
+#}
+#
+##-- Tags for accounting
+#variable "default_tags" {
+#  description = "A map of tags to add to all resources"
+#  type        = "map"
+#  default = {
+#    "creation-author" = "mike"
+#    "provisioner" = "terraform"
+#  }
+#}
