@@ -35,6 +35,19 @@ resource "aws_vpc" "vpc" {
 }
 
 
+resource "aws_instance" "NatInstance" {
+  ami                         = "${var.ec2_ami}"
+  availability_zone           = "${var.aws_azs[0]}"
+  instance_type               = "t2.micro"
+  key_name                    = "${aws_key_pair.xanto.key_name}"
+  security_groups             = ["${aws_security_group.Allow_ICMP.id}", "${aws_security_group.sg_test.id}"]
+  subnet_id                   = "${module.public_subnet.subnet_ids}"
+  associate_public_ip_address = true
+  source_dest_check           = false
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s-%s", var.vpc_name, "NAT_Instance")))}"
+}
+
+
 
 }
 
