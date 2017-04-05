@@ -85,6 +85,12 @@ resource "aws_instance" "NatInstance" {
   subnet_id                   = "${element(aws_subnet.public.*.id, count.index)}"
 
   source_dest_check           = false
+
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = 8
+    delete_on_termination = true
+  }
   tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s-%s", var.vpc_name, "NAT_Instance")))}"
 }
 
