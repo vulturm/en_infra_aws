@@ -10,13 +10,19 @@
 # Description:
 #   Helper that will help us manage our 'terraform' plans.
 
-.PHONY: all plan apply destroy
+.PHONY: all test get info plan apply destroy
 
 all: plan apply
 test: plan
 
 get:
 	terraform get
+
+info:
+		for resursa in $$(terraform state list); do \
+			echo -e "\n\n========================\n$$resursa\n------------------------"; \
+			terraform state show $$resursa; \
+		done
 
 plan:
 	terraform plan -var-file infrastructure.conf -out terraform.tfplan | tee -a logs/plan.log
