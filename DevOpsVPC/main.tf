@@ -78,7 +78,7 @@ resource "aws_instance" "NatInstance" {
   availability_zone           = "${var.aws_azs[0]}"
   instance_type               = "t2.micro"
   key_name                    = "${aws_key_pair.xanto.key_name}"
-  security_groups             = ["${aws_security_group.AllowICMP.id}", "${aws_security_group.Default.id}"]
+  vpc_security_group_ids      = ["${aws_security_group.AllowICMP.id}", "${aws_security_group.Default.id}"]
   subnet_id                   = "${element(aws_subnet.public.*.id, count.index)}"
 
   source_dest_check           = false
