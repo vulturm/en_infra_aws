@@ -163,6 +163,13 @@ resource "aws_security_group" "default" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  # Outbound acces to anywhere
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG.%s", var.vpc_name, "default")))}"
