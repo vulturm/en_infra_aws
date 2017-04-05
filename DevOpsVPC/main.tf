@@ -29,9 +29,7 @@ resource "aws_vpc" "vpc" {
   lifecycle { 
     create_before_destroy = true
   }
-  tags      {
-    Name = "${var.vpc_name}"
-  }
+  tags = "${merge(var.default_tags, map("Name", var.vpc_name))}"
 }
 
 ################# PUBLIC SUBNET
@@ -39,8 +37,7 @@ resource "aws_vpc" "vpc" {
 resource "aws_internet_gateway" "public" {
   vpc_id = "${aws_vpc.vpc.id}"
 
-  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_IGW.%s", var.vpc_name, element(var.aws_azs, count.index))))}"
-
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PubGW_%s", var.vpc_name, element(var.aws_azs, count.index))))}"
 }
 
 resource "aws_subnet" "public" {
@@ -49,7 +46,7 @@ resource "aws_subnet" "public" {
   availability_zone = "${element(var.aws_azs, count.index)}"
   count             = "${length(var.vpc_public_subnets)}"
 
-  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PubSubnet.%s", var.vpc_name, element(var.aws_azs, count.index))))}"
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PubSubnet_%s", var.vpc_name, element(var.aws_azs, count.index))))}"
 
   lifecycle { create_before_destroy = true }
 
@@ -64,7 +61,7 @@ resource "aws_route_table" "public" {
       gateway_id = "${aws_internet_gateway.public.id}"
   }
 
-  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PubSubnet.%s", var.vpc_name, element(var.aws_azs, count.index))))}"
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PubSubRT_%s", var.vpc_name, element(var.aws_azs, count.index))))}"
 }
 
 resource "aws_route_table_association" "public" {
@@ -81,7 +78,7 @@ resource "aws_instance" "NatInstance" {
   availability_zone           = "${var.aws_azs[0]}"
   instance_type               = "t2.micro"
   key_name                    = "${aws_key_pair.xanto.key_name}"
-  security_groups             = ["${aws_security_group.Allow_ICMP.id}", "${aws_security_group.default.id}"]
+  security_groups             = ["${aws_security_group.AllowICMP.id}", "${aws_security_group.Default.id}"]
   subnet_id                   = "${element(aws_subnet.public.*.id, count.index)}"
 
   source_dest_check           = false
@@ -91,7 +88,7 @@ resource "aws_instance" "NatInstance" {
     volume_size = 8
     delete_on_termination = true
   }
-  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s-%s", var.vpc_name, "NAT_Instance")))}"
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_%s", var.vpc_name, "NATInstance")))}"
 }
 
 ################ PRIVATE SUBNET
@@ -102,7 +99,7 @@ resource "aws_subnet" "private" {
   availability_zone = "${element(var.aws_azs, count.index)}"
   count             = "${length(var.vpc_private_subnets)}"
 
-  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PrvSubnet.%s", var.vpc_name, element(var.aws_azs, count.index))))}"
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PrvSubnet_%s", var.vpc_name, element(var.aws_azs, count.index))))}"
   lifecycle { create_before_destroy = true }
 }
 
@@ -116,7 +113,7 @@ resource "aws_route_table" "private" {
 #    nat_gateway_id = "${element(split(",", var.nat_gateway_ids), count.index)}"
   }
 
-  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PrvSubnet.%s", var.vpc_name, element(var.aws_azs, count.index))))}"
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PrvSubRT_%s", var.vpc_name, element(var.aws_azs, count.index))))}"
   lifecycle { create_before_destroy = true }
 }
 
@@ -130,7 +127,7 @@ resource "aws_route_table_association" "private" {
 
 
 # Security Group #
-resource "aws_security_group" "Allow_ICMP" {
+resource "aws_security_group" "AllowICMP" {
   vpc_id      = "${aws_vpc.vpc.id}"
   description = "Allow all ICMP traffic"
 
@@ -141,12 +138,12 @@ resource "aws_security_group" "Allow_ICMP" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG.%s", var.vpc_name, "Allow_ICMP")))}"
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG_%s", var.vpc_name, "AllowICMP")))}"
 }
 
-resource "aws_security_group" "default" {
+resource "aws_security_group" "Default" {
   vpc_id      = "${aws_vpc.vpc.id}"
-  description = "default VPC security group"
+  description = "Default VPC security group"
 
   # TCP access
   ingress {
@@ -172,5 +169,5 @@ resource "aws_security_group" "default" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG.%s", var.vpc_name, "default")))}"
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG_%s", var.vpc_name, "Default")))}"
 }
