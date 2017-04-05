@@ -81,7 +81,7 @@ resource "aws_instance" "NatInstance" {
   availability_zone           = "${var.aws_azs[0]}"
   instance_type               = "t2.micro"
   key_name                    = "${aws_key_pair.xanto.key_name}"
-  security_groups             = ["${aws_security_group.Allow_ICMP.id}", "${aws_security_group.sg_test.id}"]
+  security_groups             = ["${aws_security_group.Allow_ICMP.id}", "${aws_security_group.default.id}"]
   subnet_id                   = "${element(aws_subnet.public.*.id, count.index)}"
 
   source_dest_check           = false
@@ -132,7 +132,6 @@ resource "aws_route_table_association" "private" {
 # Security Group #
 resource "aws_security_group" "Allow_ICMP" {
   vpc_id      = "${aws_vpc.vpc.id}"
-  name        = "Allow_ICMP"
   description = "Allow all ICMP traffic"
 
   ingress {
@@ -142,14 +141,11 @@ resource "aws_security_group" "Allow_ICMP" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
-    Name = "${var.vpc_name}-Allow_ICMP"
-  }
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG.%s", var.vpc_name, "Allow_ICMP")))}"
 }
 
-resource "aws_security_group" "sg_test" {
+resource "aws_security_group" "default" {
   vpc_id      = "${aws_vpc.vpc.id}"
-  name = "sg_test"
   description = "default VPC security group"
 
   # TCP access
@@ -167,7 +163,7 @@ resource "aws_security_group" "sg_test" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags {
-    Name = "${var.vpc_name}-SG_Test"
   }
+
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG.%s", var.vpc_name, "default")))}"
 }
