@@ -34,15 +34,47 @@ resource "aws_vpc" "vpc" {
   }
 }
 
-#--
-module "public_subnet" {
-  source = "github.com/hashicorp/best-practices//terraform/modules/aws/network/public_subnet"
+################# PUBLIC SUBNET
+
+resource "aws_internet_gateway" "public" {
   vpc_id = "${aws_vpc.vpc.id}"
-  azs    = "${join(",",var.aws_azs)}"
-  #--
-  name   = "${var.vpc_name}_Public_Subnet"
-  cidrs  = "${join(",", var.vpc_public_subnets)}"
+
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_IGW.%s", var.vpc_name, element(var.aws_azs, count.index))))}"
+
 }
+
+resource "aws_subnet" "public" {
+  vpc_id            = "${aws_vpc.vpc.id}"
+  cidr_block        = "${element(var.vpc_public_subnets, count.index)}"
+  availability_zone = "${element(var.aws_azs, count.index)}"
+  count             = "${length(var.vpc_public_subnets)}"
+
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PubSubnet.%s", var.vpc_name, element(var.aws_azs, count.index))))}"
+
+  lifecycle { create_before_destroy = true }
+
+  map_public_ip_on_launch = true
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+  route {
+      cidr_block = "0.0.0.0/0"
+      gateway_id = "${aws_internet_gateway.public.id}"
+  }
+
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PubSubnet.%s", var.vpc_name, element(var.aws_azs, count.index))))}"
+}
+
+resource "aws_route_table_association" "public" {
+  count          = "${length(var.vpc_public_subnets)}"
+  subnet_id      = "${element(aws_subnet.public.*.id, count.index)}"
+  route_table_id = "${aws_route_table.public.id}"
+}
+
+
+################## NAT INSTANCE
 
 resource "aws_instance" "NatInstance" {
   ami                         = "${var.ec2_ami}"
@@ -50,24 +82,45 @@ resource "aws_instance" "NatInstance" {
   instance_type               = "t2.micro"
   key_name                    = "${aws_key_pair.xanto.key_name}"
   security_groups             = ["${aws_security_group.Allow_ICMP.id}", "${aws_security_group.sg_test.id}"]
-  subnet_id                   = "${module.public_subnet.subnet_ids}"
+  subnet_id                   = "${aws_subnet.public.0.id}"
   associate_public_ip_address = true
   source_dest_check           = false
   tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s-%s", var.vpc_name, "NAT_Instance")))}"
 }
 
+################ PRIVATE SUBNET
 
-module "private_subnet" {
-  source = "github.com/hashicorp/best-practices//terraform/modules/aws/network/private_subnet"
-  vpc_id = "${aws_vpc.vpc.id}"
-  azs    = "${join(",",var.aws_azs)}"
+resource "aws_subnet" "private" {
+  vpc_id            = "${aws_vpc.vpc.id}"
+  cidr_block        = "${element(var.vpc_private_subnets, count.index)}"
+  availability_zone = "${element(var.aws_azs, count.index)}"
+  count             = "${length(var.vpc_private_subnets)}"
 
-  name   = "${var.vpc_name}_Private_Subnet"
-  cidrs  = "${join(",", var.vpc_private_subnets)}"
-#  nat_gateway_ids = "${module.NatInstance.id}"
-  nat_gateway_ids = "${aws_instance.NatInstance.id}"
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PrvSubnet.%s", var.vpc_name, element(var.aws_azs, count.index))))}"
+  lifecycle { create_before_destroy = true }
 }
 
+resource "aws_route_table" "private" {
+  vpc_id = "${aws_vpc.vpc.id}"
+  count  = "${length(var.vpc_private_subnets)}"
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    instance_id    = "${aws_instance.NatInstance.id}"
+#    nat_gateway_id = "${element(split(",", var.nat_gateway_ids), count.index)}"
+  }
+
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_PrvSubnet.%s", var.vpc_name, element(var.aws_azs, count.index))))}"
+  lifecycle { create_before_destroy = true }
+}
+
+resource "aws_route_table_association" "private" {
+  count          = "${length(var.vpc_private_subnets)}"
+  subnet_id      = "${element(aws_subnet.private.*.id, count.index)}"
+  route_table_id = "${element(aws_route_table.private.*.id, count.index)}"
+
+  lifecycle { create_before_destroy = true }
+}
 
 
 # Security Group #
