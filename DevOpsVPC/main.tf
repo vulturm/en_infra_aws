@@ -82,8 +82,8 @@ resource "aws_instance" "NatInstance" {
   instance_type               = "t2.micro"
   key_name                    = "${aws_key_pair.xanto.key_name}"
   security_groups             = ["${aws_security_group.Allow_ICMP.id}", "${aws_security_group.sg_test.id}"]
-  subnet_id                   = "${aws_subnet.public.0.id}"
-  associate_public_ip_address = true
+  subnet_id                   = "${element(aws_subnet.public.*.id, count.index)}"
+
   source_dest_check           = false
   tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s-%s", var.vpc_name, "NAT_Instance")))}"
 }
