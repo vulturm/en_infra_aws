@@ -11,15 +11,26 @@
 #   Data that's outputed to the user.
 
 
-output "vpc_id" { 
-  value = "${module.vpc.vpc_id}" 
+output "vpc_id" {
+  value = "${aws_vpc.vpc.id}" 
 }
 output "vpc_cidr" {
-  value = "${module.vpc.vpc_cidr}"
+  value = "${aws_vpc.vpc.cidr_block}"
 }
 output "public_subnet_ids" {
-  value = "${module.public_subnet.subnet_ids}"
+  value = "${join(",", aws_subnet.public.*.id)}"
 }
 output "private_subnet_ids" {
-  value = "${module.private_subnet.subnet_ids}"
+  value = "${join(",", aws_subnet.private.*.id)}"
+}
+
+#-- nat instance
+output "nat_instance_user" {
+  value = "centos"
+}
+output "nat_instance_private_ip" {
+  value = "${aws_instance.bastion.private_ip}"
+}
+output "nat_instance_public_ip" {
+  value = "${aws_instance.bastion.public_ip}"
 }
