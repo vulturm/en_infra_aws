@@ -199,4 +199,20 @@ resource "aws_security_group" "DefaultPrv" {
 
 
 
+resource "aws_instance" "TestInstance" {
+  ami                         = "${var.ec2_ami}"
+  availability_zone           = "${var.aws_azs[0]}"
+  instance_type               = "t2.micro"
+  key_name                    = "${aws_key_pair.xanto.key_name}"
+  vpc_security_group_ids      = ["${aws_security_group.AllowICMP.id}", "${aws_security_group.DefaultPrv.id}"]
+  subnet_id                   = "${element(aws_subnet.private.*.id, count.index)}"
+
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = 8
+    delete_on_termination = true
+  }
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_%s", var.vpc_name, "TestInstance")))}"
+}
+
 
