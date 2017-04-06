@@ -78,7 +78,7 @@ resource "aws_instance" "NatInstance" {
   availability_zone           = "${var.aws_azs[0]}"
   instance_type               = "t2.micro"
   key_name                    = "${aws_key_pair.xanto.key_name}"
-  vpc_security_group_ids      = ["${aws_security_group.AllowICMP.id}", "${aws_security_group.Default.id}"]
+  vpc_security_group_ids      = ["${aws_security_group.AllowICMP.id}", "${aws_security_group.DefaultPub.id}"]
   subnet_id                   = "${element(aws_subnet.public.*.id, count.index)}"
 
   source_dest_check           = false
@@ -141,9 +141,9 @@ resource "aws_security_group" "AllowICMP" {
   tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG_%s", var.vpc_name, "AllowICMP")))}"
 }
 
-resource "aws_security_group" "Default" {
+resource "aws_security_group" "DefaultPub" {
   vpc_id      = "${aws_vpc.vpc.id}"
-  description = "Default VPC security group"
+  description = "Default VPC security group for public facing IPs"
 
   # TCP access
   ingress {
@@ -169,5 +169,34 @@ resource "aws_security_group" "Default" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG_%s", var.vpc_name, "DefaultPub")))}"
+}
+
+resource "aws_security_group" "DefaultPrv" {
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "Default VPC security group for private IPs"
+
+  # Permit access from the VMs that resides in Public Subnet
+  ingress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    security_groups = ["${aws_security_group.DefaultPub.id}"]
+  }
+
+  # Outbound acces to anywhere
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG_%s", var.vpc_name, "Default")))}"
 }
+
+
+
+
+
+
