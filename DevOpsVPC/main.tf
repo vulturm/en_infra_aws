@@ -88,6 +88,18 @@ resource "aws_instance" "NatInstance" {
     volume_size = 8
     delete_on_termination = true
   }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo iptables -t nat -C POSTROUTING -o eth0 -s ${join(",", var.vpc_private_subnets)} -j MASQUERADE 2> /dev/null || sudo iptables -t nat -A POSTROUTING -o eth0 -s ${join(",", var.vpc_private_subnets)} -j MASQUERADE",
+      "echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf",
+      "echo 'net.ipv4.conf.eth0.send_redirects=0' >> /etc/sysctl.conf",
+      "echo 'net.netfilter.nf_conntrack_max=131072' >> /etc/sysctl.conf"
+    ]
+    connection {
+      user     = "centos"
+      agent    = true
+    }
+  }
   tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_%s", var.vpc_name, "NATInstance")))}"
 }
 
@@ -196,9 +208,7 @@ resource "aws_security_group" "DefaultPrv" {
 }
 
 
-
-
-
+############################
 resource "aws_instance" "TestInstance" {
   ami                         = "${var.ec2_ami}"
   availability_zone           = "${var.aws_azs[0]}"
