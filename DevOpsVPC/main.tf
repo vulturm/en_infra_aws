@@ -98,7 +98,7 @@ resource "aws_instance" "NatInstance" {
     ]
     connection {
       user     = "centos"
-      agent    = true
+      private_key = "${file("/home/vagrant/.ssh/id_rsa")}"
     }
   }
   tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_%s", var.vpc_name, "NATInstance")))}"
