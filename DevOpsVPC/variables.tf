@@ -49,6 +49,16 @@ variable "enable_dns_hostnames" {
   default = true
 }
 
+#-- Security
+variable "ssh_public_key_name" {
+  description = "Name of the SSH Key"
+  type = "string"
+}
+variable "ssh_public_key_file" {
+  description = "Location for the public ssh key file"
+  type = "string"
+}
+
 
 ##-- Tags for accounting
 variable "default_tags" {
