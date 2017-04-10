@@ -59,6 +59,11 @@ variable "ssh_public_key_file" {
   type = "string"
 }
 
+#-- EC2
+variable "ec2_ami" {
+  description = "Name of the AMI image used for EC2 creation"
+  type = "string"
+}
 
 ##-- Tags for accounting
 variable "default_tags" {
