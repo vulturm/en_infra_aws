@@ -60,8 +60,8 @@ variable "ssh_public_key_file" {
 }
 
 #-- EC2
-variable "ec2_ami" {
-  description = "Name of the AMI image used for EC2 creation"
+variable "ec2_os" {
+  description = "OS version that will be used to find AMI image for EC2 creation"
   type = "string"
 }
 
@@ -72,6 +72,32 @@ variable "default_tags" {
   default = {
     "Author" = "mike"
     "Provisioner" = "terraform"
+  }
+}
+
+#-- Determine latest CentOS AMI by our search criteria
+data "aws_ami" "centos" {
+  most_recent   = true
+  owners = ["679593333241"] # CentOS
+  filter {
+    name   = "owner-alias"
+    values = ["aws-marketplace"]
+  }
+  filter {
+    name    = "name"
+    values  = ["${var.ec2_os}*"]
+  }
+  filter {
+    name    = "state"
+    values  = ["available"]
+  }
+  filter {
+    name    = "architecture"
+    values  = ["x86_64"]
+  }
+  filter {
+    name    = "virtualization-type"
+    values  = ["hvm"]
   }
 }
 
