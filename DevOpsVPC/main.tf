@@ -17,6 +17,10 @@ provider "aws" {
   shared_credentials_file   = "/home/vagrant/.aws/credentials"
 }
 
+resource "aws_key_pair" "xanto" {
+  key_name = "${var.ssh_public_key_name}"
+  public_key = "${file(var.ssh_public_key_file)}"
+}
 
 resource "aws_vpc" "vpc" {
   cidr_block           = "${var.vpc_cidr}"
