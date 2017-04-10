@@ -1,0 +1,12 @@
+# Compiled files
+*.tfstate
+*.tfstate.backup
+terraform.tfplan
+terraform.tfstate
+.terraform/
+.vagrant/
+# temporary files
+*.log
+*.bak
+*~
+.*.swp
