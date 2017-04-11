@@ -73,7 +73,7 @@ resource "aws_route_table_association" "public" {
 ################## NAT INSTANCE
 
 resource "aws_instance" "NatInstance" {
-  ami                         = "${data.aws_ami.centos.image_id}"
+  ami                         = "${replace(var.ec2_custom_image, "/^ami-.*/", "1") == 1 ? var.ec2_custom_image : data.aws_ami.centos.image_id}"
   availability_zone           = "${var.aws_azs[0]}"
   instance_type               = "t2.micro"
   key_name                    = "${aws_key_pair.xanto.key_name}"
@@ -226,8 +226,7 @@ resource "aws_security_group" "DefaultPrv" {
 
 ############################
 resource "aws_instance" "TestInstance" {
-  ami                         = "${data.aws_ami.centos.image_id}"
-
+  ami                         = "${replace(var.ec2_custom_image, "/^ami-.*/", "1") == 1 ? var.ec2_custom_image : data.aws_ami.centos.image_id}"
   availability_zone           = "${var.aws_azs[0]}"
   instance_type               = "t2.micro"
   key_name                    = "${aws_key_pair.xanto.key_name}"

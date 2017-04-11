@@ -6,7 +6,11 @@ CHANGELOG
 
 This file is used to list changes made in each version of the `en_infra_aws` project.
 
-### Version 0.1.0
+### Version 1.1.0
+Provide the possibility to specify custom AMI name.
+Takes precedence over the AMI autodetection feature. 
+
+### Version 1.0.0
 Initial implementation of the AWS VPC using terraform.
 VPC
   - Public subnet
@@ -16,6 +20,7 @@ VPC
   - NAT instance assigned to the public subnet
   - Test Instance assigned to the private subnet
   - Working NAT
+  - Automatic detection of the CentOS AMI
 
 TO DO:
 Refactoring

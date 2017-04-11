@@ -113,6 +113,7 @@ Refer to the `variables.tf` file in the `DevOpsVPC` directory for the default va
 ### Instances related
 |Variable |Type |Description |Comments |
 |:---------|:----|:-----------|:--------|
+| `ec2_custom_image` | *String* | Name of the AWS AMI to be used when spawning EC2 instance. Takes precedence over `ec2_os` | Optional | 
 | `ec2_os` | *String* | OS version that will be used to find AMI image for EC2 creation. | Mandatory |
 
 ### Other variables
