@@ -60,6 +60,11 @@ variable "ssh_public_key_file" {
 }
 
 #-- EC2
+variable "ec2_custom_image" {
+  description = "Name of the AWS AMI to be used when spawning EC2 instance. Takes precedence over 'ec2_os'"
+  type = "string"
+}
+
 variable "ec2_os" {
   description = "OS version that will be used to find AMI image for EC2 creation"
   type = "string"
