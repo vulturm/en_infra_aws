@@ -21,7 +21,7 @@ output "NAT_private_ip" {
 }
 
 output "NAT_public_ip" {
-    value = "${aws_instance.NatInstance.public_ip}"
+    value = "${aws_eip.NatInstance.public_ip}"
 }
 
 #--

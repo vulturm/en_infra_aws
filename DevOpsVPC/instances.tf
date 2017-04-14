@@ -11,6 +11,18 @@
 #   Provisions AWS instances used in our project
 #
 
+
+#-- EIP for NAT Instance
+resource "aws_eip" "NatInstance" {
+    instance = "${aws_instance.NatInstance.id}"
+    vpc      = true
+}
+#--
+resource "aws_eip_association" "eip_assoc_NatInstance" {
+  instance_id   = "${aws_instance.NatInstance.id}"
+  allocation_id = "${aws_eip.NatInstance.id}"
+}
+
 ################## NAT INSTANCE
 resource "aws_instance" "NatInstance" {
   ami                         = "${replace(var.ec2_custom_image, "/^ami-.*/", "1") == 1 ? var.ec2_custom_image : data.aws_ami.centos.image_id}"
@@ -30,17 +42,12 @@ resource "aws_instance" "NatInstance" {
   tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_%s", var.vpc_name, "NATInstance")))}"
 }
 
-resource "aws_eip" "NatInstance" {
-    instance = "${aws_instance.NatInstance.id}"
-    vpc      = true
-}
-
 #-- workarround adding a triggered resource
 #-- because of a circular dependency between
 #-- eip and aws_instance
 resource "null_resource" "preparation" {
   triggers {
-    instance = "${aws_instance.NatInstance.id}"
+    association_ip_address = "${aws_eip_association.eip_assoc_NatInstance.id}"
   }
   provisioner "remote-exec" {
     inline = [
