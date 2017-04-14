@@ -6,6 +6,11 @@ CHANGELOG
 
 This file is used to list changes made in each version of the `en_infra_aws` project.
 
+### Version 1.2.1
+Fixed outputing NATInstance public_ip by separating the creation and assignement phases.
+Fixed remote-exec provisioning retry sequence - now is triggered by the assignement 
+ of the EIP instead of the instance creation and retry until the resource is ready.
+
 ### Version 1.2.0
 `main.tf` config was split in multiple `.tf` files according to their purpose.
 
