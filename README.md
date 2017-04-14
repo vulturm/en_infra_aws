@@ -132,10 +132,11 @@ Will read our custom `infrastructure.conf`, process the tf files then compare th
 
 ### make apply
 Will read our custom `infrastructure.conf`, will process the tf filse and send the commands to `AWS API` to provision the infrastructure.
+Will save a copy of the previous statefile in the `statefiles/beforeapply_$$(date +"%s").backup` location.
 
 ### make destroy
-Will read our custom `infrastructure.conf`, do a `terraform plan` then `terraform destroy`.<br />
-`**WARNING!**` This command destroys the entire `terraform controlled` infrastructure without any notice! Don't use it in production.
+Will read our custom `infrastructure.conf`, do a `terraform plan -destroy`, which creates a planfile in `statefiles/destroy.tfplan` then will `apply that destroy plan`.<br />
+`**WARNING!**` This command destroys the entire `terraform controlled` infrastructure without any notice! Use it with care in production.
 
 ### make info
 Will parse the list of the `terraform state` and show a detailed human readable output so that we could inspect our infrastructure.
