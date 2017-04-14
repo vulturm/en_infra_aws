@@ -25,11 +25,12 @@ info:
 		done
 
 plan:
-	terraform plan -var-file infrastructure.conf -out terraform.tfplan | tee -a logs/plan.log
+	terraform plan -var-file infrastructure.conf -out=statefiles/plan.tfplan -state=statefiles/terraform.tfstate | tee -a logs/plan.log
 
 apply:
-	terraform apply -var-file infrastructure.conf -backup terraform.backup | tee -a logs/apply.log
+	terraform apply -var-file infrastructure.conf -backup=statefiles/beforeapply_$$(date +"%s").backup -state=statefiles/terraform.tfstate | tee -a logs/apply.log
 
 destroy:
-	terraform plan -destroy -var-file infrastructure.conf -out terraform.tfplan | tee -a logs/destroy.log
-	terraform apply terraform.tfplan | tee -a logs/destroy.log
+	terraform plan -destroy -var-file infrastructure.conf -out=statefiles/destroy.tfplan -state=statefiles/terraform.tfstate | tee -a logs/destroy.log
+	terraform apply statefiles/destroy.tfplan | tee -a logs/destroy.log
+	mv -f terraform.tfstate statefiles/destroy.tfstate
