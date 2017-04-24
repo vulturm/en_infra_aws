@@ -79,7 +79,7 @@ resource "aws_route_table" "private" {
 
   route {
     cidr_block     = "0.0.0.0/0"
-    instance_id    = "${aws_instance.NatInstance.id}"
+    instance_id    = "${module.nat.instance_id}"
 #    nat_gateway_id = "${element(split(",", var.nat_gateway_ids), count.index)}"
   }
 

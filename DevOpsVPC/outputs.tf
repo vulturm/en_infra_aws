@@ -13,15 +13,15 @@
 
 #-- EC2 Instances
 output "NAT_instance_id" {
-    value = "${aws_instance.NatInstance.id}"
+    value = "${module.nat.instance_id}"
 }
 
 output "NAT_private_ip" {
-    value = "${aws_instance.NatInstance.private_ip}"
+    value = "${module.nat.private_ip}"
 }
 
 output "NAT_public_ip" {
-    value = "${aws_eip.NatInstance.public_ip}"
+    value = "${module.nat.public_ip}"
 }
 
 #--

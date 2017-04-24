@@ -11,68 +11,35 @@
 #   Provisions AWS instances used in our project
 #
 
-
-#-- EIP for NAT Instance
-resource "aws_eip" "NatInstance" {
-    instance = "${aws_instance.NatInstance.id}"
-    vpc      = true
-}
-#--
-resource "aws_eip_association" "eip_assoc_NatInstance" {
-  instance_id   = "${aws_instance.NatInstance.id}"
-  allocation_id = "${aws_eip.NatInstance.id}"
-}
-
 ################## NAT INSTANCE
-resource "aws_instance" "NatInstance" {
-  ami                         = "${replace(var.ec2_custom_image, "/^ami-.*/", "1") == 1 ? var.ec2_custom_image : data.aws_ami.centos.image_id}"
-  availability_zone           = "${var.aws_azs[0]}"
-  instance_type               = "t2.micro"
-  key_name                    = "${aws_key_pair.xanto.key_name}"
-  vpc_security_group_ids      = ["${aws_security_group.AllowICMP.id}", "${aws_security_group.DefaultPub.id}"]
-  subnet_id                   = "${element(aws_subnet.public.*.id, count.index)}"
+module "nat" {
+  source                = "../modules/nat"
 
-  source_dest_check           = false
+  number_of_instances   = 1
 
-  root_block_device {
-    volume_type = "gp2"
-    volume_size = 8
-    delete_on_termination = true
-  }
-  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_%s", var.vpc_name, "NATInstance")))}"
+  instance_name         = "NatVPN"
+  vpc_name              = "${var.vpc_name}"
+  vpc_id                = "${aws_vpc.vpc.id}"
+  instance_type         = "t2.micro"
+  #-- we always want latest CentOS 7 AMI for NAT
+  ami_id                = "${data.aws_ami.centos.image_id}"
+  subnet_id             = "${join(",", aws_subnet.public.*.id)}"
+  private_subnets_cidr  = "${join(",", aws_subnet.private.*.cidr_block)}"
+  inbound_ports         = "${var.nat_inbound_ports}"
+  user_data             = "../files/user-data/nat-vpn.cfg"
+  key_name              = "${aws_key_pair.xanto.key_name}"
+  #-- assuming 'private key name' by removing the '.pub' extension
+  private_key_file      = "${replace(var.ssh_public_key_file, ".pub", "")}"
+  sgs                   = "${aws_default_security_group.default.id},${aws_security_group.AllowICMP.id},${aws_security_group.DefaultPub.id}"
 }
 
-#-- workarround adding a triggered resource
-#-- because of a circular dependency between
-#-- eip and aws_instance
-resource "null_resource" "preparation" {
-  triggers {
-    association_ip_address = "${aws_eip_association.eip_assoc_NatInstance.id}"
-  }
-  provisioner "remote-exec" {
-    inline = [
-      "sudo iptables -t nat -C POSTROUTING -o eth0 -s ${join(",", var.vpc_private_subnets)} -j MASQUERADE 2> /dev/null || sudo iptables -t nat -A POSTROUTING -o eth0 -s ${join(",", var.vpc_private_subnets)} -j MASQUERADE",
-      "echo 'net.ipv4.ip_forward=1' | sudo tee -a /etc/sysctl.conf",
-      "echo 'net.ipv4.conf.eth0.send_redirects=0' | sudo tee -a /etc/sysctl.conf",
-      "echo 'net.netfilter.nf_conntrack_max=131072' | sudo tee -a /etc/sysctl.conf",
-      "sudo sysctl -p"
-    ]
-    connection {
-      host        = "${aws_eip.NatInstance.public_ip}"
-      user        = "centos"
-      timeout     = "30s"
-      private_key = "${file("/home/vagrant/.ssh/id_rsa")}"
-    }
-  }
-}
-
-################## TEST INSTANCE
+################### TEST INSTANCE
 resource "aws_instance" "TestInstance" {
   ami                         = "${replace(var.ec2_custom_image, "/^ami-.*/", "1") == 1 ? var.ec2_custom_image : data.aws_ami.centos.image_id}"
   availability_zone           = "${var.aws_azs[0]}"
   instance_type               = "t2.micro"
   key_name                    = "${aws_key_pair.xanto.key_name}"
-  vpc_security_group_ids      = ["${aws_security_group.AllowICMP.id}", "${aws_security_group.DefaultPrv.id}"]
+  vpc_security_group_ids      = ["${aws_default_security_group.default.id}", "${aws_security_group.AllowICMP.id}", "${aws_security_group.DefaultPrv.id}"]
   subnet_id                   = "${element(aws_subnet.private.*.id, count.index)}"
 
   root_block_device {
@@ -80,5 +47,5 @@ resource "aws_instance" "TestInstance" {
     volume_size = 8
     delete_on_termination = true
   }
-  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_%s", var.vpc_name, "TestInstance")))}"
+  tags = "${merge(var.default_tags, map("ManageRunningTime", "WorkingHoursStop"), map("VPC", var.vpc_name), map("Name", format("%s_%s", var.vpc_name, "TestInstance")))}"
 }

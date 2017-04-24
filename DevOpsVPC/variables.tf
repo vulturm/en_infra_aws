@@ -50,6 +50,11 @@ variable "enable_dns_hostnames" {
 }
 
 #-- Security
+variable "ssh_user" {
+  description = "Name of the ssh user used for connecting to the remote instances"
+  type = "string"
+}
+
 variable "ssh_public_key_name" {
   description = "Name of the SSH Key"
   type = "string"
@@ -70,6 +75,11 @@ variable "ec2_os" {
   type = "string"
 }
 
+#--
+variable "nat_inbound_ports" {
+  description = "Allow following TCP ports to NAT instance."
+  default  = "22,443"
+}
 ##-- Tags for accounting
 variable "default_tags" {
   description = "A map of tags to add to all resources"

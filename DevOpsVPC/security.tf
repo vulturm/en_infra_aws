@@ -17,6 +17,29 @@ resource "aws_key_pair" "xanto" {
   public_key = "${file(var.ssh_public_key_file)}"
 }
 
+#-- Default SG, can't be deleted. Only modified
+resource "aws_default_security_group" "default" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+  #-- allow traffic between the resources
+  #-- that have this SG attached
+  ingress {
+    protocol  = -1
+    self      = true
+    from_port = 0
+    to_port   = 0
+  }
+
+  #-- allow outside traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG_%s", var.vpc_name, "default")))}"
+}
+
 #-- Security Groups
 resource "aws_security_group" "AllowICMP" {
   vpc_id      = "${aws_vpc.vpc.id}"
@@ -53,14 +76,14 @@ resource "aws_security_group" "DefaultPub" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Outbound acces to anywhere
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
+#  # Outbound acces to anywhere
+#  egress {
+#    from_port = 0
+#    to_port = 0
+#    protocol = "-1"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
   tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG_%s", var.vpc_name, "DefaultPub")))}"
 }
 
@@ -87,3 +110,4 @@ resource "aws_security_group" "DefaultPrv" {
 
   tags = "${merge(var.default_tags, map("VPC", var.vpc_name), map("Name", format("%s_SG_%s", var.vpc_name, "DefaultPrv")))}"
 }
+

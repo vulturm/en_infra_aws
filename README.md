@@ -20,6 +20,8 @@ This project uses Terraform to accomplish this goal.
   -  [Security related](#security-related)
   -  [Instances related](#instances-related)
   -  [Other variables](#other-variables)
+- [Modules](#modules)
+  -  [NAT](#nat----modulesnat)
 - [Usage](#usage)
   -  [Inspect the infrastructure](#make-plan)
   -  [Apply changes](#make-apply)
@@ -79,9 +81,7 @@ Project's data that can vary from one environment to another was exposed using v
 This file is automatically loaded when invoking terraform by the `Makefile wrapper`. <br />
 Refer to the `variables.tf` file in the `DevOpsVPC` directory for the default values.
 
-[//]: # (Segment attributes by environment if multiple environments are created)
-
-[//]: # (Copy section for multiple separated environments.)
+[//]: # (Segment attributes by category.)
 
 [//]: # (### Top Level Variables)
 [//]: # (|Variable |Type |Description |Comments |)
@@ -103,10 +103,12 @@ Refer to the `variables.tf` file in the `DevOpsVPC` directory for the default va
 | `vpc_public_subnets` | *List* | List of `CIDR blocks` for our public subnets.<br /> Must be in range of the `vpc_cidr`. | Mandatory |
 | `enable_dns_support` | *Boolean* | Should be `true` if you want to use private DNS within the VPC. | Optional, defaults to `true` |
 | `enable_dns_hostnames` | *Boolean* | Should be true if you want to use private DNS within the VPC. | Optional, defaults to `true` |
+| `nat_inbound_ports` | *String* | Comma separated list of ports that will be opened on the public facing IP of the NAT instance.<br> Eg. SSH+VPN ports | Optional, defaults to `22,443` |
 
 ### Security related
 |Variable |Type |Description |Comments |
 |:---------|:----|:-----------|:--------|
+| `ssh_user` | *String* | Name of the SSH used used to connect with during instance provisioning | Mandatory |
 | `ssh_public_key_name` | *String* | Name of the `SSH Key` that will be uploaded into AWS and used for SSH into instances. | Mandatory |
 | `ssh_public_key_file` | *String* | Location for the public ssh key file on your local workstation. | Mandatory |
 
@@ -120,6 +122,36 @@ Refer to the `variables.tf` file in the `DevOpsVPC` directory for the default va
 |Variable |Type |Description |Comments |
 |:---------|:----|:-----------|:--------|
 | `default_tags` | *Map* | A map of tags to add to all resources for audit, identification, etc. | Optional |
+
+---
+[//]: # (Terraform Modules that this project provides.)
+
+[//]: # (### Exposed variables to configure the module.)
+[//]: # (|Variable |Type |Description |Comments |)
+[//]: # (|:---------|:----|:-----------|:--------|)
+[//]: # (| | | | |)
+
+## Modules
+### `NAT` -- `modules/nat/`
+- Terraform module used to configure a EC2 instance that will serve as NAT Gateway/purpose for the instances that reside in the private subnet.
+### Exposed variables:
+|Variable |Type |Description |Comments |
+|:---------|:----|:-----------|:--------|
+| `instance_name` | *String* | Name of the Nat instance that will appear in AWS Console | Mandatory |
+| `instance_type` | *String* | Type of the instance used that will serve as NAT Purpose | Optional |
+| `vpc_name` | *String* | VPC name that the created instance will be assigned to. | Mandatory |
+| `vpc_id` | *String* | VPC ID that the instance will be assigned to. | Mandatory |
+| `subnet_id` | *String* | Subnet ID that will be `used for instance interface` creation. Eg. Public Subnet ID. | Mandatory |
+| `private_subnets_cidr` | *String* | `CIDR of the private subnet` that the instance will do `NAT translation` for | Mandatory |
+| `ami_id` | *String* | `AWS AMI ID` used for instance creation | Mandatory |
+| `user_data` | *String* | `user_data` config used during instance creation | Mandatory |
+| `sgs` | *String* | `Security groups IDs` that will be assigned to the NAT instance | Mandatory |
+| `key_name` | *String* | `AWS Name of the ssh key` to be used during instance provisioning | Mandatory |
+| `private_key_file` | *String* | Location for the private ssh key file that will be used to connect to the instance during provisioning | Mandatory |
+| `number_of_instances` | *Integer* | Number of NAT instances to spawn | Optional, defaults to `1` |
+| `root_volume_size` | *Integer* | Size in GBytes for the NAT instance root volume | Optional, defaults to `8` |
+| `inbound_ports` | *String* | Comma separated list of ports that will be opened on the public facing IP of the NAT instance. Eg. SSH+VPN ports | Optional |
+
 
 ---
 ## **Usage**
