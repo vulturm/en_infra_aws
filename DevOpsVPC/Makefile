@@ -33,4 +33,5 @@ apply:
 destroy:
 	terraform plan -destroy -var-file infrastructure.conf -out=statefiles/destroy.tfplan -state=statefiles/terraform.tfstate | tee -a logs/destroy.log
 	terraform apply statefiles/destroy.tfplan | tee -a logs/destroy.log
-	mv -f terraform.tfstate statefiles/destroy.tfstate
+	mv -f statefiles/terraform.tfstate statefiles/terraform.tfstate.old
+	mv -f terraform.tfstate statefiles/terraform.tfstate
