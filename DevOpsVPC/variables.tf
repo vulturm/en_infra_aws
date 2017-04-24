@@ -80,6 +80,12 @@ variable "nat_inbound_ports" {
   description = "Allow following TCP ports to NAT instance."
   default  = "22,443"
 }
+#--
+variable "vpn_port" {
+  description = "TCP port OpenVPN will listen to"
+  default  = "1194"
+}
+
 ##-- Tags for accounting
 variable "default_tags" {
   description = "A map of tags to add to all resources"

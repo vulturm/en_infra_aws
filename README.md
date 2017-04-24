@@ -22,6 +22,7 @@ This project uses Terraform to accomplish this goal.
   -  [Other variables](#other-variables)
 - [Modules](#modules)
   -  [NAT](#nat----modulesnat)
+  -  [VPN](#vpn----modulesvpn)
 - [Usage](#usage)
   -  [Inspect the infrastructure](#make-plan)
   -  [Apply changes](#make-apply)
@@ -137,21 +138,34 @@ Refer to the `variables.tf` file in the `DevOpsVPC` directory for the default va
 ### Exposed variables:
 |Variable |Type |Description |Comments |
 |:---------|:----|:-----------|:--------|
-| `instance_name` | *String* | Name of the Nat instance that will appear in AWS Console | Mandatory |
-| `instance_type` | *String* | Type of the instance used that will serve as NAT Purpose | Optional |
+| `instance_name` | *String* | Name of the Nat instance that will appear in AWS Console. | Mandatory |
+| `instance_type` | *String* | Type of the instance used that will serve as NAT Purpose. | Optional |
 | `vpc_name` | *String* | VPC name that the created instance will be assigned to. | Mandatory |
 | `vpc_id` | *String* | VPC ID that the instance will be assigned to. | Mandatory |
 | `subnet_id` | *String* | Subnet ID that will be `used for instance interface` creation. Eg. Public Subnet ID. | Mandatory |
-| `private_subnets_cidr` | *String* | `CIDR of the private subnet` that the instance will do `NAT translation` for | Mandatory |
-| `ami_id` | *String* | `AWS AMI ID` used for instance creation | Mandatory |
-| `user_data` | *String* | `user_data` config used during instance creation | Mandatory |
-| `sgs` | *String* | `Security groups IDs` that will be assigned to the NAT instance | Mandatory |
-| `key_name` | *String* | `AWS Name of the ssh key` to be used during instance provisioning | Mandatory |
-| `private_key_file` | *String* | Location for the private ssh key file that will be used to connect to the instance during provisioning | Mandatory |
-| `number_of_instances` | *Integer* | Number of NAT instances to spawn | Optional, defaults to `1` |
-| `root_volume_size` | *Integer* | Size in GBytes for the NAT instance root volume | Optional, defaults to `8` |
-| `inbound_ports` | *String* | Comma separated list of ports that will be opened on the public facing IP of the NAT instance. Eg. SSH+VPN ports | Optional |
+| `private_subnets_cidr` | *String* | `CIDR of the private subnet` that the instance will do `NAT translation` for. | Mandatory |
+| `ami_id` | *String* | `AWS AMI ID` used for instance creation. | Mandatory |
+| `user_data` | *String* | `user_data` config used during instance creation. | Mandatory |
+| `sgs` | *String* | `Security groups IDs` that will be assigned to the NAT instance. | Mandatory |
+| `key_name` | *String* | `AWS Name of the ssh key` to be used during instance provisioning. | Mandatory |
+| `private_key_file` | *String* | Location for the private ssh key file that will be used to connect to the instance during provisioning. | Mandatory |
+| `number_of_instances` | *Integer* | Number of NAT instances to spawn. | Optional, defaults to `1` |
+| `root_volume_size` | *Integer* | Size in GBytes for the NAT instance root volume. | Optional, defaults to `8` |
+| `inbound_ports` | *String* | Comma separated list of ports that will be opened on the public facing IP of the NAT instance. Eg. SSH+VPN ports. | Optional |
 
+
+### `VPN` -- `modules/vpn/`
+- Terraform module used to configure OpenVPN server. It uses a chef cookbook to accomplish this goal.
+### Exposed variables:
+|Variable |Type |Description |Comments |
+|:---------|:----|:-----------|:--------|
+| `ssh_user` | *String* | Name of the ssh user used for configuring the remote instances. | Mandatory |
+| `private_key_file` | *String* | Path to private key file used in combination with ssh_user. | Mandatory |
+| `ovpn_cookbook_ver` | *String* | Version of the custom chef cookbook used to configure the OpenVPN service. | Optional, defaults to `1.1.0` |
+| `vpn_ip` | *String* | IP Address of the OpenVPN server. It also connects to this IP during server configuration. | Mandatory |
+| `vpn_port` | *String* | Port that the OpenVPN server will listen to. | Mandatory |
+| `vpn_proto` | *String* | Protocol used for VPN transport: `udp` or `tcp`.. | Optional, defaults to `tcp` |
+| `vpc_cidr` | *String* | CIDR block we want the OpenVPN server to add a route to facilitate traffic | Mandatory |
 
 ---
 ## **Usage**

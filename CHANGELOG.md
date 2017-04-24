@@ -6,6 +6,9 @@ CHANGELOG
 
 This file is used to list changes made in each version of the `en_infra_aws` project.
 
+### Version 1.5.0
+Implement modular VPN configuration.
+
 ### Version 1.4.0
 Separate NAT instance configuration using a 'terraform module'.
 
