@@ -6,6 +6,9 @@ CHANGELOG
 
 This file is used to list changes made in each version of the `en_infra_aws` project.
 
+### Version 1.4.0
+Separate NAT instance configuration using a 'terraform module'.
+
 ### Version 1.3.0
 Move terraform generated files: (.tfstate, .tfplan) into a separate `statefiles` directory.
 

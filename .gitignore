@@ -10,3 +10,6 @@ terraform.tfstate
 *.bak
 *~
 .*.swp
+# statefiles/ -- is difficult to store them in SCM,
+# better configure terraform remote state storage
+statefiles/
