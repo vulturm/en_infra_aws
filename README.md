@@ -14,6 +14,7 @@ This project uses Terraform to accomplish this goal.
 - [Supported Cloud Providers by this project](#supported-cloud-providers-by-this-project)
 - [Dependencies](#dependencies)
 - [Prerequisites](#prerequisites)
+  -   [Remote state file](#remote-state-file)
 - [Exposed configuration](#exposed-configuration)
   -  [VPC creation related](#vpc-creation-related)
   -  [Networking related](#networking-related)
@@ -24,6 +25,7 @@ This project uses Terraform to accomplish this goal.
   -  [NAT](#nat----modulesnat)
   -  [VPN](#vpn----modulesvpn)
 - [Usage](#usage)
+  -  [Init Terraform](#terraform-init)
   -  [Inspect the infrastructure](#make-plan)
   -  [Apply changes](#make-apply)
   -  [Destroy managed infrastructure](#make-destroy)
@@ -60,7 +62,7 @@ Simple file based configuration gives you a single view of your entire infrastru
 ## Dependencies
 |Dependency |Comments |
 |:---------|:----------|
-| `terraform` | This project was developed and tested using `Terraform v0.9.2` | 
+| `terraform` | This project was developed and tested using `Terraform v0.9.8` | 
 | `make` | `Makefile` helper file was developed and tested using `GNU Make 3.82` |
 
 
@@ -76,6 +78,12 @@ aws_secret_access_key = someSecretPassKey
 
 You need to install terraform by downloading the [appropriate package][4] for your operating system then extract the zip archive.<br />
 Terraform runs as a single binary named terraform.
+
+### Remote state file
+To prevent stack corruption when terraform is used by multiple teams, remote storate of the state file was implemented.
+To provision AWS resource required for remote state storage run `make apply` in `RemoteState` directory.
+Name of the created `S3 Bucket` and `DynamoDB table` can be configured from `infrastructure.conf`.
+Statefile configuration cannot contain interpolations. If the default values will be changed, the `DevOpsVPC/state.tf` file will also have to be synced manually.
 
 ## Exposed configuration
 Project's data that can vary from one environment to another was exposed using variables in the `infrastructure.conf` file.
@@ -173,6 +181,9 @@ Refer to the `variables.tf` file in the `DevOpsVPC` directory for the default va
 [//]: # (Identify the commands -- that are meant to be called by a user.)
 
 ## Terraform commands are wrapped by the `Makefile` script.
+### Terraform init
+This will solve module dependencies and configure terraform to use remote state. For provisioning of the resources required for remote state configuration, see [Remote state file][5]. 
+
 ### make plan
 Will read our custom `infrastructure.conf`, process the tf files then compare the local tfstate with the remote state of the infrastructure and will tell you what needs to be done without actually doing it.
 
@@ -202,3 +213,4 @@ License:          'GPL v3'<br>
 [2]: https://github.com/hashicorp/hcl "HCL"
 [3]: http://pubs.opengroup.org/onlinepubs/9699919799/utilities/make.html "Make"
 [4]: https://www.terraform.io/downloads.html "Download Terraform"
+[5]: #remote-state-file "Prerequisites - Remote state file"
